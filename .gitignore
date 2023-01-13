@@ -1,0 +1,6 @@
+/target
+# this is where password and url is written
+config.toml
+
+# this is my editor
+.vscode
