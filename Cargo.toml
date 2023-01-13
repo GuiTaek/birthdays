@@ -1,0 +1,19 @@
+[package]
+name = "birthdays"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+reqwest = { version = "0.11.2", features = ["blocking"] }
+#tokio = { version = "1", features = ["full"] }
+toml = "0.5.10"
+rpassword = "7.2.0"
+rand = "0.8.5"
+
+# some apis need that
+tokio = "1.24.1"
+
+# for checking if an email is valid
+check-if-email-exists = "0.9.0"
