@@ -17,3 +17,6 @@ tokio = "1.24.1"
 
 # for checking if an email is valid
 check-if-email-exists = "0.9.0"
+
+# for gui
+fltk = { version = "^1.2", features = ["fltk-bundled"] }
