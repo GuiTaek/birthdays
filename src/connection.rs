@@ -11,6 +11,7 @@ use std::io::Read;
 use std::fmt::Display;
 
 use check_if_email_exists::{check_email, CheckEmailInput, Reachable};
+use fltk::{app::App, window::Window, input::Input, button::Button, prelude::*};
 use reqwest::{blocking::Client, Error as ReqwestError};
 use rpassword::read_password;
 use toml::{value::Map, Value};
@@ -115,7 +116,7 @@ impl Display for ToCredError {
 #[derive(Debug)]
 pub struct Credentials {
     fqdn: String,
-    email: String,
+    username: String,
     password: Password,
 }
 
@@ -182,7 +183,7 @@ pub fn to_cred(path: String, file_content: &str) -> Result<CTConn, ToCredError> 
     let password = &mut toml_file["password"].as_str().unwrap().clone();
     let cred = Credentials {
         fqdn,
-        email,
+        username: email,
         password: Password(password.to_string()),
     };
     let client = try_cred_ct(&cred).map_err(|err| ToCredError::AuthFailed(err))?;
@@ -252,7 +253,7 @@ fn type_cred(input: &mut impl Read) -> Option<CTConn> {
         // mut to delete the password afterwards
         let cred = Credentials {
             fqdn: fqdn.clone(),
-            email: email.clone(),
+            username: email.clone(),
             password: password,
         };
         let client = try_cred_ct(&cred);
@@ -277,7 +278,7 @@ fn try_cred_ct(cred: &Credentials) -> Result<Client, ReqwestError> {
     let client = reqwest::blocking::Client::new();
     let post_str = format!(
         "https://{}/?q=login/ajax?email={}&password={}",
-        cred.fqdn, cred.email, cred.password
+        cred.fqdn, cred.username, cred.password
     );
     client.post(post_str).send()?;
     Ok(client)
@@ -342,6 +343,26 @@ fn _get_ctconn(path: String, input: &mut impl Read, save_password_to_file: bool)
     else {
         type_cred(input).ok_or(CTConnError::MaxNumberRetries)
     }
+}
+
+/// asks the user for [Credentials]
+/// doesn't handle user giving wrong values
+fn app_cred(fqdn: String) -> Credentials {
+    let mut app = App::default();
+    let mut window = Window::new(100, 100, 550, 135, "birthdays app");
+    let mut fqdn = Input::new(150, 5, 300, 30, "fqdn of churchtools: ");
+    let mut username = Input::new(150, 35, 300, 30, "username:");
+    let mut password = fltk::input::SecretInput::new(150, 65, 300, 30, "password:");
+    let mut button = Button::new(300, 100, 60, 30, "send");
+    fqdn.set_tooltip("A \"fully qualified domain name\" (fqdn) \
+        is a part of an url/link. It defines uniquely an IP adress and \
+        therefore a server. The fqdn that is  needed here is the fqdn \
+        from churchtools, without a trailing point \".\". An example \
+        would be \"xxx.church.tools\" where \"xxx\" stand for the acronym your church has.");
+    window.end();
+    window.show();
+    app.run().unwrap();
+    Credentials {fqdn: fqdn.value(), username: username.value(), password: Password(password.value())}
 }
 
 #[cfg(test)]
