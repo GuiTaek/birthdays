@@ -383,6 +383,33 @@ fn get_fqdn(config_path: String) -> Result<String, ConfigError> {
     }
 }
 
+/// handles creating a (churchtools connection)[CTConn]
+fn handle_app(config_path: String) -> CTConn {
+    match get_fqdn(config_path) {
+        Ok(fqdn) => {
+            for _ in nr_type_loop_iter() {
+                let cred = app_cred(fqdn);
+                is_valid_address(&format!("https://{fqdn}/"));
+                let client = try_cred_ct(&cred);
+                match client {
+                    Ok(client) => {
+                        // only need to delete the password here, in every other case
+                        // the password isn't correct anyways
+                        return Some(CTConn { cred, client });
+                    }
+                    Err(err) => {
+                        // TODO: should be a window
+                        println!("couldn't connect, reason: {}", err);
+                    }
+                }
+            }
+            None
+        }
+    }
+
+}
+}
+
 #[cfg(test)]
 mod tests {
     use rand::{thread_rng, Rng};
