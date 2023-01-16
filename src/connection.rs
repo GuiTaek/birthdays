@@ -365,6 +365,24 @@ fn app_cred(fqdn: String) -> Credentials {
     Credentials {fqdn: fqdn.value(), username: username.value(), password: Password(password.value())}
 }
 
+enum ConfigError {
+    FileError,
+    NoFQDNKey(std::io::Error),
+}
+
+/// returns the fqdn of the config file if possible else the fitting error
+fn get_fqdn(config_path: String) -> Result<String, ConfigError> {
+    match fs::read_to_string(&path) {
+        Ok(content) => {
+            let toml_file = content.parse::<toml::Value>()?;
+            toml_file["fqdn"].as_str().ok_or(ConfigError::FileError).to_string()
+        }
+        Err(err) => {
+            ConfigError::FileError(err)
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use rand::{thread_rng, Rng};
