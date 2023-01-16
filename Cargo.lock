@@ -241,6 +241,7 @@ version = "0.1.0"
 dependencies = [
  "check-if-email-exists",
  "fltk",
+ "fltk-grid",
  "rand",
  "reqwest",
  "rpassword",
@@ -464,6 +465,15 @@ dependencies = [
  "fltk-sys",
  "paste",
  "ttf-parser",
+]
+
+[[package]]
+name = "fltk-grid"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "da076b7231ad7b9c419865933af398a1c98d8dc349a1dba531f81e4534d2acc7"
+dependencies = [
+ "fltk",
 ]
 
 [[package]]
